@@ -115,8 +115,12 @@ encoded_x = encoder.predict(test_x)
 decoded_output = decoder.predict(encoded_x)
 
 #--------------------------------Build new model using encoded test set--------------------------
+#Encode data set from above using the encoder
+encoded_train_x = encoder.predict(train_x)
+encoded_test_x = encoder.predict(test_x)
+
 model = Sequential()
-model.add(Dense(16, input_dim=encoded_x.shape[1],
+model.add(Dense(16, input_dim=encoded_train_x.shape[1],
                 kernel_initializer='normal',
                 #kernel_regularizer=regularizers.l2(0.02),
                 activation="relu"
@@ -127,7 +131,7 @@ model.add(Dense(1))
 model.add(Activation("sigmoid"))
 model.compile(loss="binary_crossentropy", optimizer='adam')
 
-history = model.fit(encoded_x, test_y, validation_split=0.2, epochs=10, batch_size=64)
+history = model.fit(encoded_train_x, test_y, validation_split=0.2, epochs=10, batch_size=64)
 
 # Summarize history for loss
 plt.figure()
@@ -141,7 +145,7 @@ plt.show()
 
 #---------------------------------Predictions and visuallizations-----------------------
 #Predict on test set
-predictions_NN_prob = model.predict(encoded_x)
+predictions_NN_prob = model.predict(encoded_test_x)
 predictions_NN_prob = predictions_NN_prob[:,0]
 
 predictions_NN_01 = np.where(predictions_NN_prob > 0.5, 1, 0) #Turn probability to 0-1 binary output
