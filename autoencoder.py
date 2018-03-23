@@ -69,30 +69,17 @@ test_y = np.array(test_y)
 # Choose size of our encoded representations (we will reduce our initial features to this number)
 encoding_dim = 16
 
-# this is our input placeholder
+# Define input layer
 input_data = Input(shape=(train_x.shape[1],))
-# "encoded" is the encoded representation of the input
+# Define encoding layer
 encoded = Dense(encoding_dim, activation='elu')(input_data)
-# "decoded" is the reconstruction of the input
+# Define decoding layer
 decoded = Dense(train_x.shape[1], activation='sigmoid')(encoded)
-
-# this model maps an input to its reconstruction
+# Create the autoencoder model
 autoencoder = Model(input_data, decoded)
-
-# this model maps an input to its encoded representation
-encoder = Model(input_data, encoded)
-
-# Create a placeholder for an encoded (32-dimensional) input
-encoded_input = Input(shape=(encoding_dim,))
-# Retrieve the last layer of the autoencoder model
-decoder_layer = autoencoder.layers[-1]
-# Create the decoder model
-decoder = Model(encoded_input, decoder_layer(encoded_input))
-
 #Compile the autoencoder model
 autoencoder.compile(optimizer='adam',
                     loss='binary_crossentropy')
-
 #Fit to train set, validate with dev set and save to hist_auto for plotting purposes
 hist_auto = autoencoder.fit(train_x, train_x,
                 epochs=50,
@@ -110,11 +97,21 @@ plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='upper right')
 plt.show()
 
+# Create a separate model (encoder) in order to make encodings (first part of the autoencoder model)
+encoder = Model(input_data, encoded)
+
+# Create a placeholder for an encoded input
+encoded_input = Input(shape=(encoding_dim,))
+# Retrieve the last layer of the autoencoder model
+decoder_layer = autoencoder.layers[-1]
+# Create the decoder model
+decoder = Model(encoded_input, decoder_layer(encoded_input))
+
 # Encode and decode our test set (compare them vizually just to get a first insight of the autoencoder's performance)
 encoded_x = encoder.predict(test_x)
 decoded_output = decoder.predict(encoded_x)
 
-#--------------------------------Build new model using encoded test set--------------------------
+#--------------------------------Build new model using encoded data--------------------------
 #Encode data set from above using the encoder
 encoded_train_x = encoder.predict(train_x)
 encoded_test_x = encoder.predict(test_x)
