@@ -128,7 +128,7 @@ model.add(Dense(1))
 model.add(Activation("sigmoid"))
 model.compile(loss="binary_crossentropy", optimizer='adam')
 
-history = model.fit(encoded_train_x, test_y, validation_split=0.2, epochs=10, batch_size=64)
+history = model.fit(encoded_train_x, train_y, validation_split=0.2, epochs=10, batch_size=64)
 
 # Summarize history for loss
 plt.figure()
